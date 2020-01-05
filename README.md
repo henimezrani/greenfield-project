@@ -12,6 +12,9 @@ Please make sure you interact with this repo as we usually do with the toyproble
 
 ## Throughout the development process
 * Check status, commit and push with meaningful comments to your own repo
-* Create a pull request to **YOUR OWN BRANCH**, not to the master
+* Create a pull request to **YOUR OWN BRANCH**, not to the 
+
+## Let's put that in practice
+In your respective local branches, update your README by pulling from the master remote, pushing to your branch and making a pull request!
 
 Let's go _**GHOSTS**_!
