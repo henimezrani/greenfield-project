@@ -16,7 +16,7 @@ var productSchema = mongoose.Schema({
   opinions: {
     type: Number,
     default: 1
-  }
+  },
   rating: {
     type: Number,
     default: 5

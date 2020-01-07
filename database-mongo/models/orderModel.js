@@ -1,11 +1,11 @@
 var mongoose = require('mongoose');
 
 var orderSchema = mongoose.Schema({
-  customerinfo: {
-    userId : [{ // User reference
+  customer_info: {
+    userId : { // User reference
       type: mongoose.Schema.ObjectId,
       ref: 'User'
-    }],
+    },
     street1: String, // Street line 1
     street2: String, // Street line 2
     city: String, // city
@@ -22,11 +22,14 @@ var orderSchema = mongoose.Schema({
       ref: 'Product'
     }],
     selected_size: String, // The selected size of the item
-    quantity: Number // item quantity
-    total_product_price: Number, // Item price times its quantity
+    quantity: Number, // item quantity
+    total_product_price: Number // Item price times its quantity
   }],
+  status: {
+    type: String,
+    default: "Pending"
+  },
   total_order_price: Number // total order price
-
 });
 
 var Order = mongoose.model('Order', orderSchema);
