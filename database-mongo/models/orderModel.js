@@ -29,6 +29,7 @@ var orderSchema = mongoose.Schema({
     type: String,
     default: "Pending"
   },
+  payment_method: String,
   total_order_price: Number // total order price
 });
 

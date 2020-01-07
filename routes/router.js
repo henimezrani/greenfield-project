@@ -261,11 +261,13 @@ router.post('/api/add/orders', (req, res, next)=> {
 
   var customer_info = req.body.customer_info // do not forget to pass all data in an object from the front
   var products = req.body.products // same here
+  var payment_method = req.body.payment_method
   var total_order_price = req.body.total_order_price
 
   const newOrder = new Order({
     customer_info,
     products,
+    payment_method,
     total_order_price
   });
   newOrder.save((err, order) => {
