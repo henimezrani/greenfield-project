@@ -11,3 +11,4 @@ db.once('open', function() {
   console.log('Database geekghosts connected successfully');
 });
 
+module.exports = db
