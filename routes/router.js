@@ -13,12 +13,8 @@ router.get('/api/test', (req, res) => {
 })
 
 router.post('/api/add/user', (req, res, next)=> {
-  console.log(req.body)
-  var first_name = req.body.first_name
-  var last_name = req.body.last_name
-  var email = req.body.email
-  var password = req.body.password
-  var userType = req.body.userType
+
+  var {first_name, last_name, email, password, userType} = req.body
 
   const newUser = new User({
     first_name,
@@ -69,7 +65,7 @@ router.get('/api/products/:id', (req, res)=> {
       return res.json(product)
     })
     .catch(err => next(err))
-}) // tested
+}) // tested, send the user data so that the checking is associated with the userId
 
 // Admin Operations
 
@@ -86,20 +82,8 @@ router.get('/api/users', (req, res)=> {
 }) // tested
 
 router.put('/api/update/product/:id', (req, res, next)=> {
-
   var productId = req.params.id
-  var title = req.body.title
-  var description = req.body.description
-  var brand = req.body.brand
-  var price = req.body.price
-  var availability = req.body.availability
-  var image = req.body.image
-  var opinions = req.body.opinions
-  var rating = req.body.rating
-  var size = req.body.size
-  var tags = req.body.tags
-  var color = req.body.color
-  var category = req.body.category
+  var {title, description, brand, price, availability, image, opinions, rating, size, tags, color, category} = req.body
 
   Product.findById(productId, (err, product) => {
     if (err) return console.log(err);
@@ -120,8 +104,41 @@ router.put('/api/update/product/:id', (req, res, next)=> {
       res.end();
     });
   }).catch(err => next(err));
-}) // tested, need to pass all fields or it overrides the existing values
-// Needs to be fixed
+}) // tested
+
+router.put('/api/updateOneField/product/:id', (req, res, next)=> {
+
+  // This method is similar to the previous update
+  // For this function, you need to set the object in the front and pass the data as object named data
+  // you will need to check if
+  var productId = req.params.id
+  var data = req.body.data
+
+  Product.findById(productId, (err, product) => {
+    if (err) return console.log(err);
+
+    product.set( data );
+    product.save(function (err, updatedItem) {
+      if (err) return console.log(err);
+      console.log('here')
+      next();
+    });
+  }).then(()=>{
+    const productsLog = new AdminProductsLogs({
+      type: 'Update',
+      time: new Date(),
+      productId: productId
+    });
+    console.log("updated")
+    productsLog.save(function(err, logSaved){
+      if(err){return next(err);}
+      res.end();
+    });
+  }).catch(err => {
+    console.log(err)
+    next(err);
+  })
+}) // tested
 
 router.put('/api/update/availability/:id', (req, res, next)=> {
   console.log(req.body)
@@ -151,18 +168,7 @@ router.put('/api/update/availability/:id', (req, res, next)=> {
 
 router.post('/api/add/product', (req, res, next)=> {
 
-  var title = req.body.title
-  var description = req.body.description
-  var brand = req.body.brand
-  var price = req.body.price
-  var availability = req.body.availability
-  var image = req.body.image
-  var opinions = req.body.opinions
-  var rating = req.body.rating
-  var size = req.body.size
-  var tags = req.body.tags
-  var color = req.body.color
-  var category = req.body.category
+  var {title, description, brand, price, availability, image, opinions, rating, size, tags, color, category} = req.body
 
   const newProduct = new Product({
     title,
@@ -198,7 +204,7 @@ router.get('/api/orders', (req, res)=> {
       err ? res.status(500).send(err) :
       res.json(orders)
   })
-})
+}) // tested
 
 router.put('/api/update/order_status/:id', (req, res)=> {
 
@@ -211,10 +217,10 @@ router.put('/api/update/order_status/:id', (req, res)=> {
     order.set({status});
     order.save(function (err, updatedStatus) {
       if (err) return console.log(err);
-      next();
+      res.end()
     });
   })
-})
+}) // tested
 
 router.delete('/api/delete/product/:id', (req, res, next)=> {
   const id = req.params.id
@@ -259,31 +265,61 @@ router.get('/api/customer_products', (req, res)=> {
 
 router.post('/api/add/orders', (req, res, next)=> {
 
-  var customer_info = req.body.customer_info // do not forget to pass all data in an object from the front
-  var products = req.body.products // same here
-  var payment_method = req.body.payment_method
-  var total_order_price = req.body.total_order_price
+  var {userId, delivery_info, card_info, products, payment_method, total_order_price} = req.body
 
   const newOrder = new Order({
-    customer_info,
+    userId,
+    delivery_info,
     products,
     payment_method,
     total_order_price
   });
+
+  if (newOrder.payment_method === "Credit Card") {
+    newOrder.card_info = card_info
+  }
+
   newOrder.save((err, order) => {
     if (err) return console.log(err);
     res.end();
   })
-})
+}) // tested
 
 router.get('/api/orders/:userId', (req, res)=> {
 
   var userId = req.params.userId
 
-  Order.find({"customer_info.userId": userId}, (err, orders) => {
+  Order.find({userId}, (err, orders) => {
       err ? res.status(500).send(err) :
       res.json(orders)
   })
-})
+}) // tested
+
+router.put('/api/update/deleteProductFromOrder/:id', (req, res, next)=> {
+  var orderId = req.params.id
+  var productId = req.body.productId
+
+  Order.findById(orderId, (err, order) => {
+    if (err) return console.log(err);
+
+    var newProducts = order._doc.products
+    var index = -1;
+
+    newProducts.map((elem, i) => {
+      if (JSON.stringify(elem._doc.productId) === JSON.stringify(productId)) {
+        index = i
+      }
+    })
+    if (index > -1) {
+      newProducts.splice(index, 1);
+    }
+
+    order.set({products: newProducts});
+    order.save(function (err, updatedStatus) {
+      if (err) return console.log(err);
+      next();
+    });
+  })
+}) // tested, working but poor code
 
 module.exports = router;
