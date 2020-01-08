@@ -13,8 +13,6 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static(__dirname + '/../react-client/dist'));
 
 //import routes
-
-
 app.get('/', function (req, res) {
   res.json("hi");
 });
@@ -24,7 +22,8 @@ const postRoute = require('./routes/test')
 
 //router middleware
 app.use('/api/user', authRoute)
-app.use('/api/post',postRoute) // for test
+app.use('/api/post', postRoute) // for test
+
 
 
 const port = 8080;
