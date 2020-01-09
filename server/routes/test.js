@@ -3,7 +3,8 @@ const verfiyToken = require('../Middleware/verifyToken')
 
 
 //this route is juste for testing
-router.get('/',verfiyToken,(req, res) => {
+router.post('/api/post', verfiyToken, (req, res) => {
+  console.log('here')
   res.json({posts: {title:'post test 1 '}})
 })
 

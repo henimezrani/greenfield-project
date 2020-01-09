@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const userControllers = require('../../database-mongo/controllers/userController')
 /// basic auth
 router.post('/register', async (req, res) => {
+ // console.log(req.body)
   const { name, email, password, confirmedPassword } = req.body
 
   const user = await userControllers.findUser({ name })
@@ -40,9 +41,9 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
-  const { name, password } = req.body
+  const { email, password } = req.body
   //check if the userName is registered or not
-  const user = await userControllers.findUser({ name })
+  const user = await userControllers.findUser({ email })
   if (!user) { res.send("user not exisit") }
   else {
     //if the userName exsit in database check the password
