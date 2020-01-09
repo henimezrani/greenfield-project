@@ -322,4 +322,70 @@ router.put('/api/update/deleteProductFromOrder/:id', (req, res, next)=> {
   })
 }) // tested, working but poor code
 
+router.put('/api/update/productRating/:id', (req, res, next)=> {
+  var productId = req.params.id
+  var customer_rating = req.body.customer_rating
+
+  Product.findById(productId, (err, product) => {
+    if (err) return console.log(err);
+
+    var current_Rating = product._doc.rating
+    var current_opinions = product._doc.opinions
+
+    var new_rating = (((current_opinions * current_Rating) + customer_rating) / (current_opinions + 1))
+
+    var new_opinions = current_opinions + 1
+
+    var rounded_rating = Math.round( new_rating * 10 ) / 10
+
+    product.set({opinions: new_opinions, rating: rounded_rating});
+    product.save(function (err, updatedProduct) {
+      if (err) return console.log(err);
+      next();
+    });
+  })
+}) // tested
+
+router.get('/api/customer_products/women', (req, res)=> {
+  Product.find({availability: true, category: "Women"},(err, products) => {
+    err ? res.status(500).send(err) : res.json(products)
+  })
+}) // tested
+
+router.get('/api/customer_products/men', (req, res)=> {
+  Product.find({availability: true, category: "Men"},(err, products) => {
+    err ? res.status(500).send(err) : res.json(products)
+  })
+}) // tested
+
+router.get('/api/customer_products/women/:tag', (req, res)=> {
+  var tag = req.params.tag
+  var resultArr = []
+  Product.find({availability: true, category: "Women",},(err, products) => {
+    products.map((product) => {
+      product.tags.map((retrieved_tag, i)=> {
+        if (retrieved_tag === filter_tag) {
+          resultArr.push(product)
+        }
+      })
+    })
+    err ? res.status(500).send(err) : res.json(resultArr)
+  })
+}) // tested
+
+router.get('/api/customer_products/men/:tag', (req, res)=> {
+  var filter_tag = req.params.tag
+  var resultArr = []
+  Product.find({availability: true, category: "Men"},(err, products) => {
+    products.map((product) => {
+      product.tags.map((retrieved_tag, i)=> {
+        if (retrieved_tag === filter_tag) {
+          resultArr.push(product)
+        }
+      })
+    })
+    err ? res.status(500).send(err) : res.json(resultArr)
+  })
+}) // tested
+
 module.exports = router;
