@@ -3,8 +3,6 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
 
-// import models
-
 var app = express();
 
 app.use(bodyParser.json())
@@ -22,3 +20,12 @@ app.listen(port, function() {
   console.log(`listening on http://localhost:${port}`);
 });
 
+// Bilel Addition here :
+
+const verifyToken = require('./Middleware/verifyToken')
+
+
+app.post('/api/test', verifyToken, (req, res) => { // session verification
+  console.log('here')
+  res.json({posts: {title:'post test 1 '}})
+})

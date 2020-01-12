@@ -7,24 +7,25 @@ var Order = require ('../database-mongo/models/orderModel.js')
 var UserBehaviorLogs = require ('../database-mongo/models/userBehaviorLogsModel.js')
 var AdminProductsLogs = require ('../database-mongo/models/adminProductsLogsModel.js')
 const router = express.Router();
+require('dotenv').config()
 
-router.get('/api/test', (req, res) => {
-  res.send("tesing Express route")
-})
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const verifyToken = require('../server/Middleware/verifyToken')
 
 router.post('/api/add/user', (req, res, next)=> {
 
-  var {first_name, last_name, email, password, userType} = req.body
+  var {name, email, hashedPassword, userType} = req.body
 
   const newUser = new User({
-    first_name,
-    last_name,
+    name,
+    //id_facebook ,
+    //email_facebook ,
     email,
-    password,
-    userType
+    hashedPassword,
+    userType,
   });
   newUser.save((err, user) => {
-    console.log(newUser.first_name)
     if (err) return console.log(err);
     next();
   })
@@ -37,7 +38,7 @@ router.post('/api/add/user', (req, res, next)=> {
     if(err){return next(err);}
     res.end();
   });
-}) // tested
+}) // To verify
 
 // Admin and Customer Operations
 
@@ -387,5 +388,146 @@ router.get('/api/customer_products/men/:tag', (req, res)=> {
     err ? res.status(500).send(err) : res.json(resultArr)
   })
 }) // tested
+
+/****************************************************************/
+//Authentication Bilel
+
+router.post('/api/user/register', (req, res) => {
+
+  const { name, email, password, confirmedPassword } = req.body
+
+  User.find({email},(err, user) => {
+    if (err) {
+      res.status(500).send(err)
+    }
+    if (user.length !== 0) {
+      res.json({ registred: false, msg: "user exist !" }).status(301)
+    } else {
+      //check the confirmed password match with the password
+      if (password === confirmedPassword) {
+        var token;
+        //hash the password and saved it
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+          if (err) reject(err)
+
+          const newUser = new User({
+            name,
+            //id_facebook ,
+            //email_facebook ,
+            email,
+            hashedPassword
+          });
+          newUser.save((err, user) => {
+            if (err) return console.log(err);
+            token = jwt.sign(
+              { _id: user.id },// id of new user created
+              process.env.TOKEN_SECRET,
+              { expiresIn: 3600 }
+            )
+            const userLog = new UserBehaviorLogs({
+              type: 'Account Creation',
+              userId: newUser._id,
+              time: new Date()
+            });
+            userLog.save(function(err, logSaved){
+              if(err){return next(err);}
+              res.header('auth-token', token) //saving the token in the header !!
+              res.status(200).json({ registred: true, msg: "user registred!", token })
+            });
+          })
+        })
+
+      } else {
+        res.status(401).send({ registred: false, msg: "wrong password !" })
+      }
+    }
+  })
+
+})
+
+router.post('/api/user/login',  (req, res) => {
+
+  console.log(req.body)
+
+  const { email, password } = req.body
+
+  User.findOne({email},(err, user) => {
+    if (err) {
+      res.status(500).send(err)
+    }
+    if (user.length === 0) {
+      res.send("user not exisit")
+    } else {
+      //if the userName exist in database check the password
+      bcrypt.compare(password, user.hashedPassword)
+      .then((match) => {
+        if (!match) {
+          res.status(403).json({ login: false, msg: "incorrect password !" })
+
+        } else {
+          console.log("heeeeeeeeeeeeeeeeeeeeeeeeeeee")
+          //create and assign a token
+          const token = jwt.sign(
+            { _id: user.id },// id from database
+            process.env.TOKEN_SECRET,
+            { expiresIn: 3600 }
+            )
+            console.log(token)
+          res.header('auth-token',token) //saving the token in the header !!
+          res.status(200).json({ login: true, msg: "correct password !", token })
+          //redirect user
+        }
+      })
+    }
+  })
+
+})
+
+const passport = require('passport')
+const FacebookTokenStragtegy = require('passport-facebook-token') //function
+const FacebookStrategy  =     require('passport-facebook').Strategy
+
+passport.use('facebookToken', new FacebookTokenStragtegy({
+  clientID: process.env.Facebook_Client_ID ,
+  clientSecret: process.env.Facebook_App_Secret}, async (accessToken, refreshToken, profile, done) => {
+    try {
+      id_facebook = profile._json.id
+      email_facebook = profile._json.email
+      name = profile._json.first_name + " " + profile._json.last_name
+      token = accessToken;
+      console.log(id_facebook)
+      console.log(email_facebook)
+
+      const user = await userControllers.findUser({ id_facebook })
+      const userEmail = await userControllers.findUser({ email_facebook })
+      if (user) {
+        return done(null,user)
+      }
+      const savedUser = await userControllers.createUser({ id_facebook, email_facebook, name })
+      done(null,savedUser)
+
+      console.log('refreshToken', refreshToken)
+    } catch (error) {
+      done(error, false, error.message)
+    }
+}))
+
+router.post('api/user/fb/register', passport.authenticate('facebookToken', { session: false }), (req, res, next) => {
+
+  //console.log(req.user)
+  const token = jwt.sign(
+    { _id: req.user._id },// id of new user created
+    process.env.TOKEN_SECRET,
+    { expiresIn: 3600 }
+  )
+
+  //create new token and sendit into res
+  res.header('auth-token', token)
+  res.status(200).json({ "user_token": token , "user_details": req.user})
+})
+
+router.post('/api/test', verifyToken, (req, res) => { // session verification
+  res.status(201).send({hasToken: true, userId: req.user})
+})
 
 module.exports = router;

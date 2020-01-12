@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/geekghosts');
+mongoose.connect('mongodb://localhost/greenfield');
 
 var db = mongoose.connection;
 
