@@ -1,5 +1,5 @@
 import React from "react";
-
+//function based component that display only women product from data base
 const WomenProducts = props => {
   return (
     <div>

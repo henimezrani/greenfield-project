@@ -11,6 +11,7 @@ import NavBar from "./dashbord/NavBar.jsx";
 import Home from "./dashbord/Home.jsx";
 import AddProduct from "./dashbord/AddProduct.jsx";
 
+//this component is the main component of dashbord it regroupe all the component with the router
 class Dashboard extends React.Component {
   constructor(props) {
     super(props);
@@ -20,7 +21,7 @@ class Dashboard extends React.Component {
       womenProducts: []
     };
   }
-  // fetch all data
+  // this function responsable for fetch all data before the component will render to get data from the api and update the state
   componentWillMount() {
     fetch("/api/allproducts")
       .then(data => {
@@ -35,6 +36,7 @@ class Dashboard extends React.Component {
       .then(orders => this.setState({ orders }));
 
     // fetch women product
+    //this function responsable for fetching data using the api to set state of all women products
     fetch("/api/customer_products/women")
       .then(data => {
         return data.json();
@@ -42,6 +44,7 @@ class Dashboard extends React.Component {
       .then(womenProducts => this.setState({ womenProducts }));
 
     // fetch men product
+    //this function responsable for fetching data using the api to set state of all men products
     fetch("/api/customer_products/men")
       .then(data => {
         return data.json();
@@ -51,6 +54,9 @@ class Dashboard extends React.Component {
 
   render() {
     return (
+      //we used  react router to navigate through component and passing the state as props for child components
+      //The Navbar putted outside the Switch to be rendered as fixed component
+
       <Router>
         <div>
           <NavBar />
@@ -62,7 +68,11 @@ class Dashboard extends React.Component {
             <Route exact path="/dashboard/allproducts" component={Product}>
               <Product />
             </Route>
-            <Route exact path="/dashboard/womenProducts" component={WomenProducts}>
+            <Route
+              exact
+              path="/dashboard/womenProducts"
+              component={WomenProducts}
+            >
               <WomenProducts data={this.state.womenProducts} />
             </Route>
             <Route exact path="/dashboard/menProducts" component={MenProducts}>
