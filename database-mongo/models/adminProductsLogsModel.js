@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+// This Model is used to track major CRUD Operations by the administrators on the products si that whatever happens, the business owner knows who did what.
+
 const adminProductsLogsSchema = mongoose.Schema({
   type: {
     type: String,

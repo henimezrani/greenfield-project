@@ -1,0 +1,519 @@
+API Documentation:
+-------------------------------
+
+Notes before you start: In order for the routes to be implemented correctly, make sure you keep the following things in mind:
+- tags should be lowercase and plural
+- categories should be lowercase and plural
+- whenever you encounter tag as an array, please update it as it was previously planned to be an array
+- whenever you encounter tag as "Sports, Chic" or anything of this genre, know that it changes to the products sections (shirts, dresses, shoes...)
+- Not all routes are being used, however, there are a lot of things that can be useful and that we didn't implement because we lacked time
+- There are lots of functions who can help you set a powerful Admin Dashboard that are not implemented yet for the same reason
+- Some things have changed in the product, order and user model. we tried to update as much as we could. I hope we covered everything!
+- Each API is described using the following schema:
+
+Title:
+-------------------------------
+Request Type:
+API: http://localhost:8080
+Request Body: TYPE
+{
+  xxx: xxx
+}
+Response Example: TYPE
+{
+  xxx:xxx
+}
+
+Have fun!
+
+-----------------------------------------------------------------------------------------------------------
+
+Get all users
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/users
+Response Example: ARRAY
+[
+  {
+    "_id": "5e14d7bf1d5e693f6c2f5b66",
+    "first_name": "Heni",
+    "last_name": "Mezrani",
+    "email": "test@test.com",
+    "password": "test",
+    "userType": "admin",
+    "__v": 0,
+    "ordersIds": []
+  }, ...
+]
+
+Login
+-------------------------------
+Request Type: POST
+API: http://localhost:8080//api/user/login
+Request Body: JSON
+{
+  "email": "henimezrani@gmail.com",
+  password: "s0mePa5sw0rd"
+}
+Response Example: JSON
+{
+  login: true, (or false)
+  msg: "correct password", (or "incorrect password")
+  token: token generated on login (if successfully logged in)
+  userId: logged in user ID (if successfully logged in)
+}
+
+Register
+-------------------------------
+Request Type: POST
+API: http://localhost:8080//api/user/login
+Request Body: JSON
+{
+  "name": "Heni Mezrani",
+  "email": "henimezrani@gmail.com",
+  "password": "s0mePa5sw0rd",
+  "confirmedPassword": "s0mePa5sw0rd"
+}
+Response Example: JSON
+{
+  registred: true, (or false)
+  msg: "user registred!", (or "wrong password")
+  token: token generated on registering (automatic login),
+  userId: logged in user ID
+}
+
+Get all Products for customers (filter: availability: true):
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/customer_products
+Response Example: Array
+[
+  {
+    "_id": "5e160ffa0649bc10bc0aeff1",
+    "title": "product 1",
+    "description": "product description",
+    "brand": "Armani",
+    "price": 300,
+    "color": "blue",
+    "category": "Women",
+    "__v": 0,
+    "tag": "shoes",
+    "size": [
+      "S",
+      "M",
+      "L"
+    ],
+    "rating": 5,
+    "opinions": 1,
+    "image": "https://gear.nitro.com/content/images/thumbs/default-image_600.png",
+    "availability": true
+  }, ...
+]
+
+Get all WOMEN Products for customers (filter: availability: true):
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/customer_products/women
+Response Example: Array
+[
+  {
+    "_id": "5e160ffa0649bc10bc0aeff1",
+    "title": "product 1",
+    "description": "product description",
+    "brand": "Armani",
+    "price": 300,
+    "color": "blue",
+    "category": "Women",
+    "__v": 0,
+    "tag": "polo"
+    "size": [
+      "S",
+      "M",
+      "L"
+    ],
+    "rating": 5,
+    "opinions": 1,
+    "image": "https://gear.nitro.com/content/images/thumbs/default-image_600.png",
+    "availability": true
+  }, ...
+]
+
+Get all MEN Products for customers (filter: availability: true):
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/customer_products/men
+Response Example: Array
+[
+  {
+    "_id": "5e160ffa0649bc10bc0aeff1",
+    "title": "product 1",
+    "description": "product description",
+    "brand": "Armani",
+    "price": 300,
+    "color": "blue",
+    "category": "Men",
+    "__v": 0,
+    "tag": "shirts",
+    "size": [
+      "S",
+      "M",
+      "L"
+    ],
+    "rating": 5,
+    "opinions": 1,
+    "image": "https://gear.nitro.com/content/images/thumbs/default-image_600.png",
+    "availability": true
+  }, ...
+]
+
+Get all WOMEN Products for customers GIVEN A TAG FILTER (filter: availability: true):
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/customer_products/women/:tag
+Response Example: Array
+[
+  {
+    "_id": "5e160ffa0649bc10bc0aeff1",
+    "title": "product 1",
+    "description": "product description",
+    "brand": "Armani",
+    "price": 300,
+    "color": "blue",
+    "category": "Women",
+    "__v": 0,
+    "tag": "outerwear",
+    "size": [
+      "S",
+      "M",
+      "L"
+    ],
+    "rating": 5,
+    "opinions": 1,
+    "image": "https://gear.nitro.com/content/images/thumbs/default-image_600.png",
+    "availability": true
+  }, ...
+]
+
+Get all MEN Products for customers GIVEN A TAG FILTER (filter: availability: true):
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/customer_products/men/:tag
+Response Example: Array
+[
+  {
+    "_id": "5e160ffa0649bc10bc0aeff1",
+    "title": "product 1",
+    "description": "product description",
+    "brand": "Armani",
+    "price": 300,
+    "color": "blue",
+    "category": "Men",
+    "__v": 0,
+    "tag": "outerwear",
+    "size": [
+      "S",
+      "M",
+      "L"
+    ],
+    "rating": 5,
+    "opinions": 1,
+    "image": "https://gear.nitro.com/content/images/thumbs/default-image_600.png",
+    "availability": true
+  }, ...
+]
+
+Get all Products for ADMIN (all products with no filter):
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/admin_products
+Response Example: Array
+[
+  {
+    "_id": "5e160ffa0649bc10bc0aeff1",
+    "title": "product 1",
+    "description": "product description",
+    "brand": "Armani",
+    "price": 300,
+    "color": "blue",
+    "category": "Women",
+    "__v": 0,
+    "tag": "outerwear",
+    "size": [
+      "S",
+      "M",
+      "L"
+    ],
+    "rating": 5,
+    "opinions": 1,
+    "image": "https://gear.nitro.com/content/images/thumbs/default-image_600.png",
+    "availability": true
+  }, ...
+]
+
+Get all orders:
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/orders
+Response Example: Array
+[
+  {
+    "_id": "5e1628d63b7e9036349b94d5",
+    "userId": "5e16247cc9e9473fa4e6cab6",
+    "payment_method": "Cash on delivery",
+    "total_order_price": 1000,
+    "__v": 1,
+    "status": "Pending",
+    "products": [
+      {
+        "productId": "5e14e3365f053a3bdcdef532",
+        "selected_size": "M",
+        "quantity": 2,
+        "total_product_price": 400,
+        "_id": "5e1628d63b7e9036349b94d7"
+      },
+      {
+        "productId": "5e16101c0649bc10bc0aeff3",
+        "selected_size": "M",
+        "quantity": 1,
+        "total_product_price": 300,
+        "_id": "5e1628d63b7e9036349b94d6"
+      }
+    ],
+    "delivery_info": {
+      "street1": "addr",
+      "street2": "addr2",
+      "city": "Tunis",
+      "zip": 2046,
+      "country": "Tunisia",
+      "phone_number": 55740255
+    }
+  }, ...
+]
+
+Get all User Logs:
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/logs/users
+Response Example: Array
+[
+  {
+    "_id": "5e1639e1a2884021ecc9c729",
+    "userId": "5e16383d5f66c51da4b8b2bd",
+    "type": "Checking",
+    "productId": "5e14e3365f053a3bdcdef532",
+    "time": "2020-01-08T20:21:53.060Z",
+    "__v": 0
+  }, ...
+]
+
+Get all Products Logs:
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/logs/products
+Response Example: Array
+[
+  {
+    "_id": "5e1608d5d6fc905cfcbb8236",
+    "type": "Update",
+    "time": "2020-01-08T16:52:37.253Z",
+    "productId": "5e14e3365f053a3bdcdef532",
+    "__v": 0
+  }, ...
+]
+
+Get one product:
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/products/:id
+Request Body: JSON
+{
+  userId: "5e16247cc9e9473fa4e6cab6"
+}
+Response Example: OBJECT
+{
+  "_id": "5e160ffa0649bc10bc0aeff1",
+  "title": "product 1",
+  "description": "product description",
+  "brand": "Armani",
+  "price": 300,
+  "color": "blue",
+  "category": "Women",
+  "__v": 0,
+  "tag": "t-shirt",
+  "size": [
+    "S",
+    "M",
+    "L"
+  ],
+  "rating": 5,
+  "opinions": 1,
+  "image": "https://gear.nitro.com/content/images/thumbs/default-image_600.png",
+  "availability": true
+}
+NOTE: The userId sent in the request body allows us to track the user behavior to know which products are the most checked, bought... it is optional.
+
+
+Get all orders of a specific user
+-------------------------------
+Request Type: GET
+API: http://localhost:8080/api/orders/:userId
+Response Example: TYPE
+[
+  {
+    "_id": "5e1628d63b7e9036349b94d5",
+    "userId": "5e16247cc9e9473fa4e6cab6",
+    "payment_method": "Cash on delivery",
+    "total_order_price": 1000,
+    "__v": 1,
+    "status": "Pending",
+    "products": [
+      {
+        "productId": "5e14e3365f053a3bdcdef532",
+        "selected_size": "M",
+        "quantity": 2,
+        "total_product_price": 400,
+        "_id": "5e1628d63b7e9036349b94d7"
+      },
+      {
+        "productId": "5e16101c0649bc10bc0aeff3",
+        "selected_size": "M",
+        "quantity": 1,
+        "total_product_price": 300,
+        "_id": "5e1628d63b7e9036349b94d6"
+      }
+    ],
+    "delivery_info": {
+      "street1": "addr",
+      "street2": "addr2",
+      "city": "Tunis",
+      "zip": 2046,
+      "country": "Tunisia",
+      "phone_number": 55740255
+    }
+  }
+]
+
+----------------------------------------------------------------------------
+
+Add order:
+-------------------------------
+Request Type: POST
+API: http://localhost:8080/api/add/orders
+Request Body: JSON
+{
+  userId: id,
+  delivery_info: {
+    street1: String,
+    street2: String,
+    city: String,
+    zip: Number,
+    country: String,
+    phone_number
+  },
+  card_info: {
+    card_number: Number,
+    expiration: Number,
+    ccv: Number
+  },
+  products: {
+    productId: id,
+    selected_size: String,
+    quantity: Number,
+    total_product_price: Number
+  },
+  status: String,
+  payment_method: String,
+  total_order_price: Number
+}
+
+Add product:
+-------------------------------
+Request Type: POST
+API: http://localhost:8080/api/add/product
+Request Body: JSON
+{
+  title: String,
+  description: String,
+  brand: String,
+  price: Number,
+  availability: Boolean,
+  image: String,
+  size: [String],
+  tag: String,
+  color: String,
+  category: String
+}
+
+Update product:
+-------------------------------
+Request Type: PUT
+API: http://localhost:8080/api/update/product/:id
+Request Body: JSON
+{
+  title: String,
+  description: String,
+  brand: String,
+  price: Number,
+  availability: Boolean,
+  image: String,
+  size: [String],
+  tag: String,
+  color: String,
+  category: String
+}
+
+Update one OR many product fields
+-------------------------------
+Request Type: PUT
+API: http://localhost:8080/api/updateOneField/product/:id
+Request Body: JSON
+{
+  data: {
+    title: String,
+    description: String,
+    brand: String,...
+  }
+}
+
+Update Product availability
+-------------------------------
+Request Type: PUT
+API: http://localhost:8080/api/update/availability/:id
+Request Body: JSON
+{
+  availability: Boolean
+}
+
+Update Order status
+-------------------------------
+Request Type: PUT
+API: http://localhost:8080/api/update/order_status/:id
+Request Body: JSON
+{
+  status: String
+}
+
+Update product rating
+-------------------------------
+Request Type: PUT
+API: http://localhost:8080/api/update/productRating/:id
+Request Body: JSON
+{
+  customer_rating: Number
+}
+
+Delete product from cart
+-------------------------------
+Request Type: PUT
+API: http://localhost:8080/api/update/deleteProductFromOrder/:id
+Request Body: JSON
+{
+  productId: id
+}
+
+Delete product from db
+-------------------------------
+Request Type: PUT
+API: http://localhost:8080/api/delete/product/:id
+Request Body: None
+Response: item id deleted

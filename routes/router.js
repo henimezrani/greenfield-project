@@ -14,34 +14,48 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const verifyToken = require('../server/Middleware/verifyToken')
 
-router.post('/api/add/user', (req, res, next)=> {
+/*This router is pretty long and pretty complicated to understant. even though the name describes each request by itself, we have some good news for you
+/*
+/*
+/*
+/*
+/*
+/* We provided an API.txt file that describes each function, the request body, the response you get from the reaquest as well as an example for each*/
 
-  var {name, email, hashedPassword, userType} = req.body
+// With that said, no need to read a single line of code from here!
 
-  const newUser = new User({
-    name,
-    //id_facebook ,
-    //email_facebook ,
-    email,
-    hashedPassword,
-    userType,
-  });
-  newUser.save((err, user) => {
-    if (err) return console.log(err);
-    next();
-  })
-  const userLog = new UserBehaviorLogs({
-    type: 'Account Creation',
-    userId: newUser._id,
-    time: new Date()
-  });
-  userLog.save(function(err, logSaved){
-    if(err){return next(err);}
-    res.end();
-  });
-}) // To verify
+
 
 // Admin and Customer Operations
+
+
+router.get('/api/products/:id', (req, res)=> {
+  var productId = req.params.id;
+  var userId = req.body.userId
+  Product.findById(productId)
+  .then(product => {
+  const userLog = new UserBehaviorLogs({
+    type: 'Checking',
+    productId: productId,
+    time: new Date()
+  })
+    if (userId) {
+      userLog.userId = userId
+    }
+    userLog.save(function(err, logSaved){
+      if(err){return next(err);}
+      res.end();
+    });
+    return product;
+  })
+  .then(product => {
+    if (!product) return res.status(404).end()
+    return res.json(product)
+  })
+  .catch(err => next(err))
+}) // tested, send the user data so that the checking is associated with the userId
+
+// Admin Operations
 
 router.get("/api/allproducts", (req, res) => {
   Product.find().then(data => {
@@ -49,50 +63,15 @@ router.get("/api/allproducts", (req, res) => {
   });
 });
 
-router.get('/api/products/:id', (req, res)=> {
-  var productId = req.params.id;
-  var userId = req.body.userId
-  Product.findById(productId)
-    .then(product => {
-      const userLog = new UserBehaviorLogs({
-        type: 'Checking',
-        productId: productId,
-        time: new Date()
-      })
-      if (userId) {
-        userLog.userId = userId
-      }
-      userLog.save(function(err, logSaved){
-        if(err){return next(err);}
-        res.end();
-      });
-      return product;
-    })
-    .then(product => {
-      if (!product) return res.status(404).end()
-      return res.json(product)
-    })
-    .catch(err => next(err))
-}) // tested, send the user data so that the checking is associated with the userId
-
-// Admin Operations
-
-router.get('/api/admin_products', (req, res)=> {
-  Product.find((err, products) => {
-      err ? res.status(500).send(err) : res.json(products)
-  })
-}) // tested
-
 router.get('/api/users', (req, res)=> {
   User.find((err, users) => {
-      err ? res.status(500).send(err) : res.json(users)
+    err ? res.status(500).send(err) : res.json(users)
   })
 }) // tested
 
 router.get('/api/getUserById/:id', (req, res)=> {
   userId = req.params.id
   User.findById(userId,(err, user) => {
-      console.log(user)
       err ? res.status(500).send(err) : res.status(200).json(user)
 
   })
@@ -151,7 +130,6 @@ router.put('/api/updateOneField/product/:id', (req, res, next)=> {
       time: new Date(),
       productId: productId
     });
-    console.log("updated")
     productsLog.save(function(err, logSaved){
       if(err){return next(err);}
       res.end();
@@ -163,7 +141,6 @@ router.put('/api/updateOneField/product/:id', (req, res, next)=> {
 }) // tested
 
 router.put('/api/update/availability/:id', (req, res, next)=> {
-  console.log(req.body)
   var productId = req.params.id
   var availability = req.body.availability
 
@@ -386,14 +363,12 @@ router.get('/api/customer_products/women/:tag', (req, res)=> {
 
 router.get('/api/customer_products/men/:tag', (req, res)=> {
   var filter_tag = req.params.tag
-  console.log(filter_tag)
   Product.find({availability: true, category: "men", tag: filter_tag},(err, products) => {
     err ? res.status(500).send(err) : res.json(products)
   })
 }) // tested
 
 router.post('/api/add/inquiry', (req, res, next)=> {
-  console.log(req.body)
 
   var {email, message} = req.body
 
@@ -458,8 +433,6 @@ router.post('/api/user/register', (req, res) => {
 
           const newUser = new User({
             name,
-            //id_facebook ,
-            //email_facebook ,
             email,
             hashedPassword
           });
@@ -525,11 +498,7 @@ router.post('/api/user/login',  (req, res) => {
 
 })
 
-const passport = require('passport')
-
-
 router.post('/api/test', verifyToken, (req, res) => { // session verification
-  console.log("correct path")
   res.status(200).send({hasToken: true, userId: req.user})
 })
 

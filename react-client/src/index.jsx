@@ -8,22 +8,22 @@ import {
 } from "react-router-dom";
 import ReactDOM from "react-dom";
 import $ from 'jquery';
-import Header from "./components2/Header.jsx";
-import Footer from "./components2/Footer.jsx";
-import Body from "./components2/Body.jsx";
+import Header from "./components/Header.jsx";
+import Footer from "./components/Footer.jsx";
+import Body from "./components/Body.jsx";
 
-import Cart from "./components2/user/cart.jsx";
-import Login from "./components2/user/login.jsx";
-import SignUp from "./components2/user/signup.jsx";
-import Account from "./components2/user/account.jsx";
-import Checkout from "./components2/user/checkout.jsx";
+import Cart from "./components/user/cart.jsx";
+import Login from "./components/user/login.jsx";
+import SignUp from "./components/user/signup.jsx";
+import Account from "./components/user/account.jsx";
+import Checkout from "./components/user/checkout.jsx";
 
-import Dashboard from "./components2/dashboard/dashboard.jsx"
-import ProductList from "./components2/body-components/productList.jsx";
-import Women from "./components2/categories/Women.jsx";
-import ProductDetails from "./components2/categories/ProductDetails.jsx";
-import Categories from "./components2/body-components/categories.jsx";
+import Dashboard from "./components/dashboard/dashboard.jsx"
+import ProductList from "./components/body-components/productList.jsx";
+import ProductDetails from "./components/body-components/ProductDetails.jsx";
+import Categories from "./components/body-components/categories.jsx";
 
+// This is the main app component. The states that are saved here are used for authentification purposes (rendering the correct information if the user is logged in) and checkout purposes (keeping the cart items in this state to communicate between the orders and the products components)
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -38,6 +38,7 @@ class App extends React.Component {
     }
   }
 
+  // this function is passed to the authentification components (register and login), to set the user data when the user is logged in
   setUserData(id, name, email) {
     this.setState({
       userData: {
@@ -49,6 +50,7 @@ class App extends React.Component {
 
   }
 
+  // this function is called when the user logs out, setting the userdata to its initial state and deleting the token from the local storage
   resetUserState() {
     window.localStorage.clear()
     this.setState({
@@ -60,25 +62,19 @@ class App extends React.Component {
     })
   }
 
+  // on mount, this request sets the user information if it finds a token in the local storage.
   componentDidMount() {
-    // data{
-    //   data: window.localStorage
-    // }
-    console.log(window.localStorage.token)
     var that = this
     $.post('/api/test', {data: window.localStorage.token}, (res)=> {
       if(res.hasToken) {
-        console.log(res)
         $.get(`/api/getUserById/${res.userId._id}`, function(response) {
           that.setUserData(response._id, response.name, response.email)
         })
-      } else {
-        console.log(res)
       }
-
     })
   }
 
+  // this function allows the communication between the products components and the cart component to add products to card and calculate the total dynamically
   addToCart(product, selectedSize, quantity) {
     var arr = this.state.cartItems
     var total = this.state.totalPrice + product.price
@@ -94,6 +90,7 @@ class App extends React.Component {
     console.log(this.state.cartItems)
   }
 
+  // this function deletes an item from the cart, it is here because it needs communication between products and cart components
   deleteFromCart(productId){
     var arr = this.state.cartItems
     var newPrice = this.state.totalPrice
@@ -111,6 +108,7 @@ class App extends React.Component {
     })
   }
 
+  // this function resets the states to their initial value after the user submits an order. however, it keeps the userdata (keeping the user logged in)
   reset() {
     this.setState({
       cartItems : [],
@@ -118,6 +116,8 @@ class App extends React.Component {
     })
   }
 
+  // this component handles routing of all elements that will be rendered in the body. we use "store" for the website components and "dashboard" for the admin components. notice that the store components only use parameters, allowing the minimum ammount of components and the maximum ammount of DRY.
+  // also, notice the use of render instead of component in the path to the product details. it allows you to pass props and parameters at the same time.
   render() {
     return (
       <Router>
@@ -128,7 +128,6 @@ class App extends React.Component {
             <Route exact path="/" component={() => <Body /> } />
 
             <Route exact path="/store/:gender" component={Categories} /> } />
-
             <Route exact path="/store/:gender/:tag" component={ProductList} />
             <Route path={`/store/:gender/:tag/:id`} render={({match}) => ( <ProductDetails gender={match.params.gender} tag={match.params.tag} id={match.params.id} addToCart={this.addToCart.bind(this)} /> )} />
 
