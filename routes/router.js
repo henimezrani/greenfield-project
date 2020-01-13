@@ -4,6 +4,7 @@ var db = require('../database-mongo/index');
 var User = require ('../database-mongo/models/userModel.js')
 var Product = require ('../database-mongo/models/productModel.js')
 var Order = require ('../database-mongo/models/orderModel.js')
+var Inquiry = require ('../database-mongo/models/inquiryModel.js')
 var UserBehaviorLogs = require ('../database-mongo/models/userBehaviorLogsModel.js')
 var AdminProductsLogs = require ('../database-mongo/models/adminProductsLogsModel.js')
 const router = express.Router();
@@ -82,14 +83,23 @@ router.get('/api/users', (req, res)=> {
   })
 }) // tested
 
+router.get('/api/getUserById/:id', (req, res)=> {
+  userId = req.params.id
+  User.findById(userId,(err, user) => {
+      console.log(user)
+      err ? res.status(500).send(err) : res.status(200).json(user)
+
+  })
+}) // tested
+
 router.put('/api/update/product/:id', (req, res, next)=> {
   var productId = req.params.id
-  var {title, description, brand, price, availability, image, opinions, rating, size, tags, color, category} = req.body
+  var {title, description, brand, price, availability, image, opinions, rating, size, tag, color, category} = req.body
 
   Product.findById(productId, (err, product) => {
     if (err) return console.log(err);
 
-    product.set({ title, description, brand, price, availability, image, opinions, rating, size, tags, color, category });
+    product.set({ title, description, brand, price, availability, image, opinions, rating, size, tag, color, category });
     product.save(function (err, updatedItem) {
       if (err) return console.log(err);
       next();
@@ -121,7 +131,6 @@ router.put('/api/updateOneField/product/:id', (req, res, next)=> {
     product.set( data );
     product.save(function (err, updatedItem) {
       if (err) return console.log(err);
-      console.log('here')
       next();
     });
   }).then(()=>{
@@ -169,19 +178,16 @@ router.put('/api/update/availability/:id', (req, res, next)=> {
 
 router.post('/api/add/product', (req, res, next)=> {
 
-  var {title, description, brand, price, availability, image, opinions, rating, size, tags, color, category} = req.body
+  var {title, description, brand, price, image, size, tag, color, category} = req.body
 
   const newProduct = new Product({
     title,
     description,
     brand,
     price,
-    availability,
     image,
-    opinions,
-    rating,
     size,
-    tags,
+    tag,
     color,
     category
   });
@@ -348,46 +354,74 @@ router.put('/api/update/productRating/:id', (req, res, next)=> {
 }) // tested
 
 router.get('/api/customer_products/women', (req, res)=> {
-  Product.find({availability: true, category: "Women"},(err, products) => {
+  Product.find({availability: true, category: "women"},(err, products) => {
     err ? res.status(500).send(err) : res.json(products)
   })
 }) // tested
 
 router.get('/api/customer_products/men', (req, res)=> {
-  Product.find({availability: true, category: "Men"},(err, products) => {
+  Product.find({availability: true, category: "men"},(err, products) => {
     err ? res.status(500).send(err) : res.json(products)
   })
 }) // tested
 
 router.get('/api/customer_products/women/:tag', (req, res)=> {
-  var tag = req.params.tag
-  var resultArr = []
-  Product.find({availability: true, category: "Women",},(err, products) => {
-    products.map((product) => {
-      product.tags.map((retrieved_tag, i)=> {
-        if (retrieved_tag === filter_tag) {
-          resultArr.push(product)
-        }
-      })
-    })
-    err ? res.status(500).send(err) : res.json(resultArr)
+  var filter_tag = req.params.tag
+  Product.find({availability: true, category: "women", tag: filter_tag},(err, products) => {
+    err ? res.status(500).send(err) : res.json(products)
   })
 }) // tested
 
 router.get('/api/customer_products/men/:tag', (req, res)=> {
   var filter_tag = req.params.tag
-  var resultArr = []
-  Product.find({availability: true, category: "Men"},(err, products) => {
-    products.map((product) => {
-      product.tags.map((retrieved_tag, i)=> {
-        if (retrieved_tag === filter_tag) {
-          resultArr.push(product)
-        }
-      })
-    })
-    err ? res.status(500).send(err) : res.json(resultArr)
+  console.log(filter_tag)
+  Product.find({availability: true, category: "men", tag: filter_tag},(err, products) => {
+    err ? res.status(500).send(err) : res.json(products)
   })
 }) // tested
+
+router.post('/api/add/inquiry', (req, res, next)=> {
+  console.log(req.body)
+
+  var {email, message} = req.body
+
+  const newInquiry = new Inquiry({
+    email,
+    message
+  });
+  newInquiry.save((err, inquiry) => {
+    if (err) return console.log(err);
+    res.end();
+  })
+}) // tested
+
+router.post('/api/addmultipleproducts', (req, res)=> {
+  products = req.body.products
+  var count = 0
+  products.map((elem)=> {
+    var {title, description, brand, price, image, size, tag, color, category} = elem
+    count++
+    const newProduct = new Product({
+      title,
+      description,
+      brand,
+      price,
+      image,
+      size,
+      tag,
+      color,
+      category
+    });
+    newProduct.save((err, product) => {
+      if (err) return console.log(err);
+      if (count === products.length) {
+        res.end();
+      }
+    })
+  })
+
+})
+
 
 /****************************************************************/
 //Authentication Bilel
@@ -432,7 +466,7 @@ router.post('/api/user/register', (req, res) => {
             userLog.save(function(err, logSaved){
               if(err){return next(err);}
               res.header('auth-token', token) //saving the token in the header !!
-              res.status(200).json({ registred: true, msg: "user registred!", token })
+              res.status(200).json({ registred: true, msg: "user registred!", token, userId: user._id})
             });
           })
         })
@@ -447,8 +481,6 @@ router.post('/api/user/register', (req, res) => {
 
 router.post('/api/user/login',  (req, res) => {
 
-  console.log(req.body)
-
   const { email, password } = req.body
 
   User.findOne({email},(err, user) => {
@@ -456,7 +488,7 @@ router.post('/api/user/login',  (req, res) => {
       res.status(500).send(err)
     }
     if (user.length === 0) {
-      res.send("user not exisit")
+      res.send("user does not exist")
     } else {
       //if the userName exist in database check the password
       bcrypt.compare(password, user.hashedPassword)
@@ -465,16 +497,14 @@ router.post('/api/user/login',  (req, res) => {
           res.status(403).json({ login: false, msg: "incorrect password !" })
 
         } else {
-          console.log("heeeeeeeeeeeeeeeeeeeeeeeeeeee")
           //create and assign a token
           const token = jwt.sign(
             { _id: user.id },// id from database
             process.env.TOKEN_SECRET,
             { expiresIn: 3600 }
             )
-            console.log(token)
           res.header('auth-token',token) //saving the token in the header !!
-          res.status(200).json({ login: true, msg: "correct password !", token })
+          res.status(200).json({ login: true, msg: "correct password !", token, userId: user._id})
           //redirect user
         }
       })
@@ -484,50 +514,12 @@ router.post('/api/user/login',  (req, res) => {
 })
 
 const passport = require('passport')
-const FacebookTokenStragtegy = require('passport-facebook-token') //function
-const FacebookStrategy  =     require('passport-facebook').Strategy
 
-passport.use('facebookToken', new FacebookTokenStragtegy({
-  clientID: process.env.Facebook_Client_ID ,
-  clientSecret: process.env.Facebook_App_Secret}, async (accessToken, refreshToken, profile, done) => {
-    try {
-      id_facebook = profile._json.id
-      email_facebook = profile._json.email
-      name = profile._json.first_name + " " + profile._json.last_name
-      token = accessToken;
-      console.log(id_facebook)
-      console.log(email_facebook)
-
-      const user = await userControllers.findUser({ id_facebook })
-      const userEmail = await userControllers.findUser({ email_facebook })
-      if (user) {
-        return done(null,user)
-      }
-      const savedUser = await userControllers.createUser({ id_facebook, email_facebook, name })
-      done(null,savedUser)
-
-      console.log('refreshToken', refreshToken)
-    } catch (error) {
-      done(error, false, error.message)
-    }
-}))
-
-router.post('api/user/fb/register', passport.authenticate('facebookToken', { session: false }), (req, res, next) => {
-
-  //console.log(req.user)
-  const token = jwt.sign(
-    { _id: req.user._id },// id of new user created
-    process.env.TOKEN_SECRET,
-    { expiresIn: 3600 }
-  )
-
-  //create new token and sendit into res
-  res.header('auth-token', token)
-  res.status(200).json({ "user_token": token , "user_details": req.user})
-})
 
 router.post('/api/test', verifyToken, (req, res) => { // session verification
-  res.status(201).send({hasToken: true, userId: req.user})
+  console.log("correct path")
+  res.status(200).send({hasToken: true, userId: req.user})
 })
 
 module.exports = router;
+

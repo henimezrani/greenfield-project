@@ -1,0 +1,26 @@
+.col-md-6 {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+nav {
+  margin-bottom: 20px;
+}
+
+.order {
+  margin: 0px 100px;
+}
+
+.order img {
+  max-width: 200px;
+}
+
+.card-img-top {
+  height: 300px;
+  object-fit: cover;
+}
+
+.customDiv {
+  padding-right: 80px !important;
+  padding-left: 80px !important;
+}

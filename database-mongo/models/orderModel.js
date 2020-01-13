@@ -20,10 +20,7 @@ var orderSchema = mongoose.Schema({
     ccv: Number // Last 3 or 4 digits for security
   },
   products: [{
-    productId : { // User reference
-      type: mongoose.Schema.ObjectId,
-      ref: 'Product'
-    },
+    product : Object,
     selected_size: String, // The selected size of the item
     quantity: Number, // item quantity
     total_product_price: Number // Item price times its quantity
@@ -39,3 +36,6 @@ var orderSchema = mongoose.Schema({
 var Order = mongoose.model('Order', orderSchema);
 
 module.exports = Order;
+
+//take off username
+//take off email
