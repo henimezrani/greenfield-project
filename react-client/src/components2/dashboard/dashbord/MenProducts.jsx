@@ -1,5 +1,5 @@
 import React from "react";
-
+//function based component to display all Men products that we fetched in the main component
 const MenProducts = props => {
   return (
     <div>

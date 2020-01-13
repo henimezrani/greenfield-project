@@ -1,5 +1,7 @@
 import React from "react";
 import Modal from "react-modal";
+
+//class based component that get orders data as propos
 class Orders extends React.Component {
   constructor(props) {
     super(props);
@@ -8,6 +10,7 @@ class Orders extends React.Component {
     };
     this.updateOrder = this.updateOrder.bind(this);
   }
+  //function that update the order that generated to the admin {not finished}
   updateOrder(e) {
     e.preventDefault();
     document.querySelectorAll(":checked")[1].value;

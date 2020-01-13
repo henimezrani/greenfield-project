@@ -6,7 +6,8 @@ import {
   Link,
   hashHistory
 } from "react-router-dom";
-
+//this component contains many link that we based at the router of the dashboard. Each link redirects the app to the specific router.
+//logout is not yet implemented
 const NavBar = props => {
   return (
     <div className="ui container">
