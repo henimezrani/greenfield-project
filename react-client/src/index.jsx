@@ -18,7 +18,7 @@ import SignUp from "./components2/user/signup.jsx";
 import Account from "./components2/user/account.jsx";
 import Checkout from "./components2/user/checkout.jsx";
 
-
+import Dashboard from "./components2/dashboard/dashboard.jsx"
 import ProductList from "./components2/body-components/productList.jsx";
 import Women from "./components2/categories/Women.jsx";
 import ProductDetails from "./components2/categories/ProductDetails.jsx";
@@ -137,6 +137,8 @@ class App extends React.Component {
             <Route exact path="/checkout" component={() => <Checkout userData={this.state.userData} totalPrice={this.state.totalPrice} cartItems={this.state.cartItems} reset={this.reset.bind(this)}/>} />
 
             <Route exact path="/account" component={() => <Account userData={this.state.userData} setUserData={this.setUserData.bind(this)} /> } />
+
+            <Route exact path="/dashboard" component={Dashboard} />
 
           </Switch>
 

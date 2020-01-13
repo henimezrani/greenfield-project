@@ -43,6 +43,12 @@ router.post('/api/add/user', (req, res, next)=> {
 
 // Admin and Customer Operations
 
+router.get("/api/allproducts", (req, res) => {
+  Product.find().then(data => {
+    res.json(data).status(200);
+  });
+});
+
 router.get('/api/products/:id', (req, res)=> {
   var productId = req.params.id;
   var userId = req.body.userId
@@ -95,11 +101,17 @@ router.get('/api/getUserById/:id', (req, res)=> {
 router.put('/api/update/product/:id', (req, res, next)=> {
   var productId = req.params.id
   var {title, description, brand, price, availability, image, opinions, rating, size, tag, color, category} = req.body
+  var data = {}
+  for (var key in req.body) {
+    if(req.body[key]) {
+      data[key] = req.body[key]
+    }
+  }
 
   Product.findById(productId, (err, product) => {
     if (err) return console.log(err);
 
-    product.set({ title, description, brand, price, availability, image, opinions, rating, size, tag, color, category });
+    product.set(data);
     product.save(function (err, updatedItem) {
       if (err) return console.log(err);
       next();
